@@ -1,0 +1,4 @@
+-r requirements.txt
+scikit-learn>=1.4
+pymcr>=0.5
+pyspc-unmix @ git+https://github.com/r-hyperspec/pyspc-unmix.git

@@ -1,0 +1,6 @@
+flet>=0.86.5,<1.0
+flet-charts>=0.86.5,<1.0
+matplotlib>=3.8
+h5py>=3.10
+numpy>=1.26
+ramappy @ git+https://github.com/ramappy/ramappy.git

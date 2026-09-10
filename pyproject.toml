@@ -1,0 +1,53 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fairaman-viewer"
+version = "0.3.2"
+description = "Flet desktop viewer and analysis application for FAIRaman Raman spectroscopy files"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "GPL-3.0-or-later"
+authors = [{name = "Maugeri Nanomed Lab"}]
+dependencies = [
+  "flet>=0.86.5,<1.0",
+  "flet-charts>=0.86.5,<1.0",
+  "matplotlib>=3.8",
+  "h5py>=3.10",
+  "numpy>=1.26",
+  "ramappy @ git+https://github.com/ramappy/ramappy.git",
+]
+
+[project.optional-dependencies]
+advanced = [
+  "scikit-learn>=1.4",
+  "pymcr>=0.5",
+  "pyspc-unmix @ git+https://github.com/r-hyperspec/pyspc-unmix.git",
+]
+dev = [
+  "pytest>=8",
+  "ruff>=0.6",
+]
+
+[project.scripts]
+fairaman-viewer = "fairaman_viewer.cli:main"
+
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fairaman_viewer"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
