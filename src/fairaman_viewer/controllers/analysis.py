@@ -76,7 +76,7 @@ class AnalysisControllerMixin:
                 ax.set_title(result.title, fontsize=10)
             else:
                 ax.text(0.5, 0.5, "Nessun profilo spettrale", ha="center", va="center", transform=ax.transAxes)
-            self.safe_update(self.analysis_chart)
+            self.render_figure(self.analysis_fig, self.analysis_chart)
 
     def refresh_analysis_controls(self) -> None:
             image_names = [name for result in self.state.analysis_results.values() for name in result.images]

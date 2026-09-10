@@ -92,7 +92,7 @@ class MapControllerMixin:
                 ax.set_axis_off()
                 ax.text(0.5, 0.5, label, ha="center", va="center", color="#b00020", transform=ax.transAxes)
                 self.state.image_data = None
-                self.safe_update(self.map_chart)
+                self.render_figure(self.map_fig, self.map_chart)
                 return
 
             self.state.image_data = np.asarray(image, float)
@@ -110,14 +110,14 @@ class MapControllerMixin:
                 ax.set_title(f"{label} · {ff.n_spectra} punti", fontsize=10)
                 ax.set_aspect("equal", adjustable="datalim")
                 self._draw_analysis_markers(ax)
-                self.safe_update(self.map_chart)
+                self.render_figure(self.map_fig, self.map_chart)
                 return
 
             if not ff.is_map:
                 ax.set_axis_off()
                 ax.text(0.5, 0.5, "File a spettro singolo\nnessuna mappa da visualizzare", ha="center", va="center", fontsize=11, color="#666", transform=ax.transAxes)
                 self.state.image_data = None
-                self.safe_update(self.map_chart)
+                self.render_figure(self.map_fig, self.map_chart)
                 return
 
             extent = ff.spatial_extent()
@@ -167,7 +167,7 @@ class MapControllerMixin:
                 )
             except Exception:
                 self._selector = None
-            self.safe_update(self.map_chart)
+            self.render_figure(self.map_fig, self.map_chart)
 
     def _draw_analysis_markers(self, ax) -> None:
             result = self.state.analysis_results.get("nfindr")

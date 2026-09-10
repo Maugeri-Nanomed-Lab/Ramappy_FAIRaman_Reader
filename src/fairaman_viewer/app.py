@@ -73,6 +73,20 @@ class FairamanViewerApp(
             except Exception:
                 pass
 
+    def render_figure(self, figure, *controls: ft.Control) -> None:
+            """Rirasterizza una figura Matplotlib e sincronizza i controlli Flet.
+
+            `flet-charts` invia un nuovo fotogramma al widget solo quando il backend
+            WebAgg esegue `canvas.draw()`. Ricostruire gli assi e chiamare solo
+            `control.update()` non basta: senza questo `draw_idle()` la chart resta
+            ferma all'ultimo fotogramma disegnato.
+            """
+            try:
+                figure.canvas.draw_idle()
+            except Exception:
+                pass
+            self.safe_update(*controls)
+
     def set_status(self, text: str) -> None:
             self.status.value = text
             self.safe_update(self.status)

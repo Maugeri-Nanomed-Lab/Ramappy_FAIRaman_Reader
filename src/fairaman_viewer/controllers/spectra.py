@@ -59,7 +59,7 @@ class SpectraControllerMixin:
             if ax.get_legend_handles_labels()[0]:
                 ax.legend(fontsize=7, loc="best", framealpha=0.85)
             ax.grid(alpha=0.25, lw=0.5)
-            self.safe_update(self.spec_chart)
+            self.render_figure(self.spec_fig, self.spec_chart)
 
     def apply_pipeline(self, _e=None) -> None:
             ff = self.state.ff
