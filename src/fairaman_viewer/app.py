@@ -16,7 +16,7 @@ from matplotlib.widgets import RectangleSelector
 from ramappy import Spectrum
 
 from .analysis.registry import ANALYSIS_PLUGINS
-from .config import APP_NAME, COLORMAPS, NORMS
+from .config import APP_NAME, COLORMAPS
 from .controllers import (
     AnalysisControllerMixin,
     ExportControllerMixin,
@@ -27,6 +27,7 @@ from .controllers import (
 from .state import ViewerState
 from .ui.baseline_panel import BaselinePanel
 from .ui.components import _card, _dropdown, _num_field
+from .ui.normalization_panel import NormalizationPanel
 from .validation.schema import summary
 
 
@@ -46,6 +47,7 @@ class FairamanViewerApp(
             self._temporary_inputs: list[Path] = []
             self._selector: RectangleSelector | None = None
             self._colorbar = None
+            self._spec_ax2 = None  # asse y secondario per l'anteprima di normalizzazione
 
             self._configure_page()
             self._build_controls()
@@ -165,10 +167,8 @@ class FairamanViewerApp(
             self.use_smooth = ft.Checkbox(label="SavGol", value=False)
             self.savgol_window = _num_field("9", label="Finestra", width=92)
             self.savgol_order = _num_field("3", label="Grado", width=82)
-            self.use_norm = ft.Checkbox(label="Normalizza", value=False)
-            self.norm_kind = _dropdown("minmax_scale", NORMS, label="Norma", width=170)
-
             self.baseline_panel = BaselinePanel(self)
+            self.normalization_panel = NormalizationPanel(self)
 
             self.spec_fig, self.spec_ax = plt.subplots(figsize=(6.0, 5.2), dpi=100, layout="constrained")
             self.spec_chart = fch.MatplotlibChartWithToolbar(figure=self.spec_fig, expand=True)
@@ -262,6 +262,10 @@ class FairamanViewerApp(
             )
 
             baseline_tab = ft.Container(padding=6, content=self.baseline_panel.control)
+            normalization_tab = ft.Container(
+                padding=6,
+                content=ft.Column(controls=[self.normalization_panel.control], scroll=ft.ScrollMode.AUTO),
+            )
             pipeline_tab = ft.Container(
                 padding=6,
                 content=ft.Column(
@@ -270,7 +274,6 @@ class FairamanViewerApp(
                             [self.use_despike, self.use_smooth, self.savgol_window, self.savgol_order],
                             wrap=True,
                         ),
-                        ft.Row([self.use_norm, self.norm_kind], wrap=True),
                         ft.Row(
                             [
                                 ft.FilledButton("Applica pipeline", icon=ft.Icons.PLAY_ARROW, on_click=self.apply_pipeline),
@@ -320,14 +323,19 @@ class FairamanViewerApp(
                 ),
             )
             processing_tabs = ft.Tabs(
-                length=3,
+                length=4,
                 content=ft.Column(
                     controls=[
-                        ft.TabBar(tabs=[ft.Tab(label="Baseline"), ft.Tab(label="Pipeline"), ft.Tab(label="Analisi avanzate")]),
+                        ft.TabBar(tabs=[
+                            ft.Tab(label="Baseline"),
+                            ft.Tab(label="Normalizzazione"),
+                            ft.Tab(label="Pipeline"),
+                            ft.Tab(label="Analisi avanzate"),
+                        ]),
                         ft.Container(
                             height=320,
                             content=ft.TabBarView(
-                                controls=[baseline_tab, pipeline_tab, advanced_tab]
+                                controls=[baseline_tab, normalization_tab, pipeline_tab, advanced_tab]
                             ),
                         ),
                     ],

@@ -23,7 +23,8 @@ src/fairaman_viewer/
 ├── validation/
 │   └── schema.py           # FAIRaman validation rules
 ├── processing/
-│   └── baseline.py         # baseline correction
+│   ├── baseline.py         # baseline correction
+│   └── normalization.py    # intensity normalization (L2, SNV, area, reference band, MSC, PQN…)
 ├── analysis/
 │   ├── models.py           # plugin contracts and result model
 │   ├── registry.py         # analysis registry
@@ -33,8 +34,9 @@ src/fairaman_viewer/
 ├── export/
 │   └── service.py          # CSV, report and figure export
 └── ui/
-    ├── components.py       # reusable Flet controls
-    └── baseline_panel.py   # baseline UI
+    ├── components.py            # reusable Flet controls
+    ├── baseline_panel.py        # baseline UI
+    └── normalization_panel.py   # normalization UI
 ```
 
 ## Install for development

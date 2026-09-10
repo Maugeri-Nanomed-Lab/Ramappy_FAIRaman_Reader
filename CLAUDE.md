@@ -43,6 +43,10 @@ Layers (`src/fairaman_viewer/`):
 - `processing/baseline.py` — baseline-correction registry (`METHODS`), preview
   (`estimate_baseline`) and chunked cancellable application (`apply_baseline`). Wraps
   `ramappy.processing`. No Flet.
+- `processing/normalization.py` — normalization registry (`METHODS`), `transform` /
+  `estimate_normalization` (preview) / `apply_normalization` (chunked, cancellable).
+  Pure NumPy, no ramappy/Flet. MSC and PQN are two-pass: `fit_reference` then
+  chunked `transform`. See `docs/NORMALIZATION.md`. Paired with `ui/normalization_panel.py`.
 - `analysis/` — advanced analyses as plugins. `models.py` defines
   `AnalysisContext` / `AnalysisResult` / `AnalysisPlugin`; `registry.py` holds
   `ANALYSIS_PLUGINS` and `register_plugin`. Runners (`nfindr.py`, `mcr_als.py`) take

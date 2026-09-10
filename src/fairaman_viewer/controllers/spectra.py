@@ -54,12 +54,39 @@ class SpectraControllerMixin:
                 if roi:
                     ax.axvspan(roi[0], roi[1], color="#1f77b4", alpha=0.07)
 
+            self._render_normalization_preview(axis)
+
             ax.set_xlabel("Raman shift (cm⁻¹)")
             ax.set_ylabel("Intensità (a.u.)")
-            if ax.get_legend_handles_labels()[0]:
-                ax.legend(fontsize=7, loc="best", framealpha=0.85)
+            handles, labels = ax.get_legend_handles_labels()
+            if self._spec_ax2 is not None and self._spec_ax2.get_visible():
+                h2, l2 = self._spec_ax2.get_legend_handles_labels()
+                handles, labels = handles + h2, labels + l2
+            if handles:
+                ax.legend(handles, labels, fontsize=7, loc="best", framealpha=0.85)
             ax.grid(alpha=0.25, lw=0.5)
             self.render_figure(self.spec_fig, self.spec_chart)
+
+    def _render_normalization_preview(self, axis) -> None:
+            """Anteprima della normalizzazione su un asse y secondario."""
+            ax2 = self._spec_ax2
+            if ax2 is not None:
+                ax2.clear()
+                ax2.set_visible(False)
+            ref = self.reference_spectrum()
+            if ref is None:
+                return
+            values, label = ref
+            preview = self.normalization_panel.preview(axis, values)
+            if preview is None:
+                return
+            if self._spec_ax2 is None:
+                self._spec_ax2 = self.spec_ax.twinx()
+            ax2 = self._spec_ax2
+            ax2.set_visible(True)
+            ax2.plot(axis, preview, color="#9467bd", lw=1.1, ls="-.", label=f"norm. anteprima «{label}»")
+            ax2.set_ylabel("intensità normalizzata", color="#9467bd", fontsize=9)
+            ax2.tick_params(axis="y", labelcolor="#9467bd", labelsize=8)
 
     def apply_pipeline(self, _e=None) -> None:
             ff = self.state.ff
@@ -70,8 +97,6 @@ class SpectraControllerMixin:
                 steps.append("despike")
             if self.use_smooth.value:
                 steps.append("savgol")
-            if self.use_norm.value:
-                steps.append(f"norm:{self.norm_kind.value}")
             if not steps:
                 self.notify("Nessun passaggio selezionato.")
                 return
@@ -97,8 +122,6 @@ class SpectraControllerMixin:
                             window_length=window,
                             polyorder=int(self.savgol_order.value or 3),
                         )
-                    elif step.startswith("norm:"):
-                        processing.normalize_intensities(obj, norm=step.split(":", 1)[1])
                 descr = " → ".join(steps)
                 self.state.history.append(descr)
                 self.after_processing()
@@ -133,6 +156,38 @@ class SpectraControllerMixin:
             self.baseline_panel.finish("errore")
             self.alert("Errore nella correzione", message)
             self.set_status("Correzione fallita.")
+
+    def on_normalization_ok(self, info: dict) -> None:
+            note = f"normalizzazione {info['method']}"
+            if info.get("roi"):
+                note += f" su {info['roi'][0]:.0f}–{info['roi'][1]:.0f} cm⁻¹"
+            if info.get("reference"):
+                note += f" [rif. {info['reference']}"
+                note += f"/{info['reference_prior']}]" if info.get("reference_prior") else "]"
+            self.state.history.append(note)
+            tail = ""
+            if info.get("degenerate"):
+                tail = f"  {info['degenerate']} spettri non normalizzabili lasciati invariati."
+            self.normalization_panel.finish(f"fatto in {info['seconds']:.1f} s")
+            self.after_processing()
+            self.set_status(
+                f"Normalizzazione «{info['method']}» applicata a {info['n_spectra']} spettri "
+                f"in {info['seconds']:.1f} s.{tail}"
+            )
+
+    def on_normalization_cancelled(self, message: str) -> None:
+            self.normalization_panel.finish("annullato")
+            self.after_processing()
+            self.alert(
+                "Normalizzazione annullata",
+                f"{message}\n\nGli spettri gia' elaborati sono stati modificati. "
+                "Usa «Ripristina grezzi» per tornare al file originale.",
+            )
+
+    def on_normalization_error(self, message: str) -> None:
+            self.normalization_panel.finish("errore")
+            self.alert("Errore nella normalizzazione", message)
+            self.set_status("Normalizzazione fallita.")
 
     def after_processing(self) -> None:
             self.state.invalidate_after_processing()

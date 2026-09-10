@@ -1,5 +1,5 @@
 """Spectral processing services."""
 
-from . import baseline
+from . import baseline, normalization
 
-__all__ = ["baseline"]
+__all__ = ["baseline", "normalization"]

@@ -8,7 +8,6 @@ APP_NAME = "FAIRaman Viewer"
 APP_VERSION = "0.3.0"
 
 COLORMAPS = ["viridis", "magma", "inferno", "cividis", "gray", "hot", "RdBu_r"]
-NORMS = ["l2", "l1", "max", "minmax_scale", "area", "spectral_position"]
 PALETTE = [
     "#1f77b4", "#d62728", "#2ca02c", "#9467bd",
     "#ff7f0e", "#8c564b", "#17becf", "#e377c2",
